@@ -1,0 +1,25 @@
+NOTAS — PWA para GitHub Pages
+
+CONTENIDO
+- index.html: aplicación principal. Consulta directamente https://appmaz.vip/api/getdata.php
+- manifest.webmanifest: permite instalar la web como app.
+- sw.js: service worker para instalación y recursos locales. La API NO se cachea.
+- icons/: iconos para Android/iPhone.
+
+SUBIR A GITHUB
+1. Crea un repositorio nuevo en GitHub.
+2. Sube TODO el contenido de esta carpeta a la raíz del repositorio.
+3. Ve a Settings > Pages.
+4. En Build and deployment selecciona: Deploy from a branch.
+5. Branch: main / (root) y pulsa Save.
+6. GitHub te dará una URL similar a https://usuario.github.io/repositorio/
+
+INSTALAR EN IPHONE
+1. Abre esa URL en Safari.
+2. Pulsa Compartir.
+3. Pulsa Añadir a pantalla de inicio.
+4. Ábrela desde el icono: funcionará como app independiente.
+
+IMPORTANTE
+- No cambies las rutas relativas ./ si vas a alojarla dentro de un repositorio de GitHub Pages.
+- La consulta a appmaz.vip se hace siempre por red y cada 2 segundos, como en la versión probada.

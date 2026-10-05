@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+
+  <meta name="theme-color" content="#ffffff">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Notas">
+
+  <title>Notas</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+
+  <!-- Roboto para modo Keep / Android -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+
+      background-color: #fff;
+
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+
+      overflow: hidden;
+    }
+
+    .editable,
+    .display {
+      position: absolute;
+
+      min-width: 60px;
+
+      outline: none;
+      border: none;
+
+      background: transparent;
+
+      color: #111;
+
+      white-space: pre-wrap;
+      word-break: break-word;
+
+      padding: 2px 4px;
+
+      border-radius: 6px;
+    }
+
+    .editable {
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .editable:focus {
+      background: rgba(255,255,255,0.18);
+    }
+
+    #titleDisplay {
+      font-size: 28px;
+      font-weight: 700;
+
+      width: 80%;
+      min-height: 40px;
+    }
+
+    #bodyDisplay {
+      font-size: 20px;
+      font-weight: 400;
+
+      width: 82%;
+      min-height: 130px;
+
+      line-height: 1.35;
+
+      pointer-events: none;
+    }
+
+    .placeholder:empty::before {
+      content: attr(data-placeholder);
+
+      color: rgba(0,0,0,0.35);
+
+      pointer-events: none;
+
+      display: block;
+    }
+
+    /*
+    Zona invisible inferior.
+
+    Manteniendo aquí 3 segundos
+    se abren los ajustes.
+    */
+
+    #footerTrigger {
+      position: fixed;
+
+      left: 0;
+      right: 0;
+      bottom: 0;
+
+      height: 120px;
+
+      z-index: 50;
+
+      background: transparent;
+    }
+
+    /* AJUSTES */
+
+    #settingsPanel {
+      position: fixed;
+
+      inset: 0;
+
+      background: rgba(0,0,0,0.55);
+
+      display: none;
+
+      align-items: center;
+      justify-content: center;
+
+      z-index: 1000;
+
+      padding: 16px;
+    }
+
+    #settingsBox {
+      width: min(92vw, 520px);
+
+      max-height: 90vh;
+
+      overflow-y: auto;
+
+      background: #fff;
+
+      border-radius: 18px;
+
+      padding: 18px;
+
+      box-shadow:
+        0 20px 60px rgba(0,0,0,0.28);
+    }
+
+    #settingsBox h2 {
+      margin: 0 0 14px 0;
+
+      font-size: 22px;
+
+      font-family: Arial, sans-serif;
+    }
+
+    .group {
+      margin-bottom: 18px;
+
+      padding-bottom: 14px;
+
+      border-bottom: 1px solid #eee;
+    }
+
+    .group:last-child {
+      border-bottom: none;
+
+      margin-bottom: 0;
+
+      padding-bottom: 0;
+    }
+
+    label {
+      display: block;
+
+      font-size: 14px;
+
+      font-weight: 700;
+
+      margin-bottom: 6px;
+
+      font-family: Arial, sans-serif;
+    }
+
+    select,
+    input[type="range"],
+    input[type="text"] {
+      width: 100%;
+
+      font-size: 16px;
+
+      font-family: Arial, sans-serif;
+    }
+
+    select,
+    input[type="text"] {
+      padding: 10px 12px;
+
+      border: 1px solid #ccc;
+
+      border-radius: 10px;
+
+      outline: none;
+
+      background: #fff;
+    }
+
+    .range-wrap {
+      margin-bottom: 12px;
+    }
+
+    .range-wrap small {
+      display: block;
+
+      margin-top: 4px;
+
+      color: #666;
+
+      font-size: 12px;
+
+      font-family: Arial, sans-serif;
+    }
+
+    .buttons {
+      display: flex;
+
+      gap: 10px;
+
+      flex-wrap: wrap;
+
+      margin-top: 16px;
+    }
+
+    button {
+      border: none;
+
+      border-radius: 12px;
+
+      padding: 12px 14px;
+
+      font-size: 15px;
+
+      font-weight: 700;
+
+      cursor: pointer;
+
+      font-family: Arial, sans-serif;
+    }
+
+    .primary {
+      background: #111;
+      color: white;
+    }
+
+    .secondary {
+      background: #ececec;
+      color: #111;
+    }
+
+    .danger {
+      background: #d93025;
+      color: white;
+    }
+
+    .file-info {
+      margin-top: 6px;
+
+      font-size: 13px;
+
+      color: #666;
+
+      word-break: break-word;
+
+      font-family: Arial, sans-serif;
+    }
+
+    .help {
+      font-size: 12px;
+
+      color: #666;
+
+      margin-top: 6px;
+
+      line-height: 1.35;
+
+      font-family: Arial, sans-serif;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div id="app">
+
+    <div
+      id="titleDisplay"
+      class="editable placeholder"
+      contenteditable="true"
+      spellcheck="false"
+      data-placeholder="Título"
+    ></div>
+
+    <div
+      id="bodyDisplay"
+      class="display"
+    ></div>
+
+  </div>
+
+
+  <div id="footerTrigger"></div>
+
+
+  <div id="settingsPanel">
+
+    <div id="settingsBox">
+
+      <h2>Ajustes</h2>
+
+
+      <div class="group">
+
+        <label for="userCode">
+          Código de usuario
+        </label>
+
+        <input
+          type="text"
+          id="userCode"
+          maxlength="3"
+          placeholder="ABC"
+        >
+
+        <div class="help">
+          Introduce tu código de 3 letras.
+          Si lo dejas vacío, se borra.
+        </div>
+
+      </div>
+
+
+      <div class="group">
+
+        <label for="fontSelect">
+          Tipografía
+        </label>
+
+        <select id="fontSelect">
+
+          <option value="ios">
+            Apple / iOS
+          </option>
+
+          <option value="keep">
+            Android / Keep
+          </option>
+
+          <option value="arial">
+            Arial
+          </option>
+
+          <option value="georgia">
+            Georgia
+          </option>
+
+          <option value="courier">
+            Courier New
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="group">
+
+        <label for="bgInput">
+          Imagen de fondo / captura
+        </label>
+
+        <input
+          type="file"
+          id="bgInput"
+          accept="image/*"
+        />
+
+        <div
+          class="file-info"
+          id="bgInfo"
+        >
+          Sin imagen cargada
+        </div>
+
+      </div>
+
+
+      <div class="group">
+
+        <label>
+          Posición del título
+        </label>
+
+        <div class="range-wrap">
+
+          <input
+            type="range"
+            id="titleX"
+            min="0"
+            max="95"
+            step="1"
+          >
+
+          <small id="titleXLabel">
+            Izquierda: 0%
+          </small>
+
+        </div>
+
+
+        <div class="range-wrap">
+
+          <input
+            type="range"
+            id="titleY"
+            min="0"
+            max="95"
+            step="1"
+          >
+
+          <small id="titleYLabel">
+            Arriba: 0%
+          </small>
+
+        </div>
+
+      </div>
+
+
+      <div class="group">
+
+        <label>
+          Posición del cuerpo
+        </label>
+
+        <div class="range-wrap">
+
+          <input
+            type="range"
+            id="bodyX"
+            min="0"
+            max="95"
+            step="1"
+          >
+
+          <small id="bodyXLabel">
+            Izquierda: 0%
+          </small>
+
+        </div>
+
+
+        <div class="range-wrap">
+
+          <input
+            type="range"
+            id="bodyY"
+            min="0"
+            max="95"
+            step="1"
+          >
+
+          <small id="bodyYLabel">
+            Arriba: 0%
+          </small>
+
+        </div>
+
+      </div>
+
+
+      <div class="group">
+
+        <label>
+          Tamaño del título
+        </label>
+
+        <div class="range-wrap">
+
+          <input
+            type="range"
+            id="titleSize"
+            min="18"
+            max="52"
+            step="1"
+          >
+
+          <small id="titleSizeLabel">
+            28 px
+          </small>
+
+        </div>
+
+
+        <label>
+          Tamaño del cuerpo
+        </label>
+
+        <div class="range-wrap">
+
+          <input
+            type="range"
+            id="bodySize"
+            min="14"
+            max="36"
+            step="1"
+          >
+
+          <small id="bodySizeLabel">
+            20 px
+          </small>
+
+        </div>
+
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="primary"
+          id="saveCloseBtn"
+        >
+          Guardar y cerrar
+        </button>
+
+
+        <button
+          class="secondary"
+          id="clearBgBtn"
+        >
+          Quitar fondo
+        </button>
+
+
+        <button
+          class="danger"
+          id="resetBtn"
+        >
+          Restablecer todo
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    const STORAGE_KEY =
+      "nota_api_fondo_configurable_v3";
+
+
+    const defaultState = {
+
+      userCode: "",
+
+      title: "",
+
+      bgData: "",
+
+      titleX: 5,
+      titleY: 8,
+
+      bodyX: 5,
+      bodyY: 20,
+
+      titleSize: 28,
+
+      bodySize: 20,
+
+      fontPreset: "ios"
+
+    };
+
+
+    let state = loadState();
+
+    let lastData = "";
+
+
+    const app =
+      document.getElementById("app");
+
+
+    const titleDisplay =
+      document.getElementById("titleDisplay");
+
+
+    const bodyDisplay =
+      document.getElementById("bodyDisplay");
+
+
+    const footerTrigger =
+      document.getElementById("footerTrigger");
+
+
+    const settingsPanel =
+      document.getElementById("settingsPanel");
+
+
+    const bgInput =
+      document.getElementById("bgInput");
+
+
+    const bgInfo =
+      document.getElementById("bgInfo");
+
+
+    const fontSelect =
+      document.getElementById("fontSelect");
+
+
+    const userCode =
+      document.getElementById("userCode");
+
+
+    const titleX =
+      document.getElementById("titleX");
+
+    const titleY =
+      document.getElementById("titleY");
+
+    const bodyX =
+      document.getElementById("bodyX");
+
+    const bodyY =
+      document.getElementById("bodyY");
+
+    const titleSize =
+      document.getElementById("titleSize");
+
+    const bodySize =
+      document.getElementById("bodySize");
+
+
+    const titleXLabel =
+      document.getElementById("titleXLabel");
+
+    const titleYLabel =
+      document.getElementById("titleYLabel");
+
+    const bodyXLabel =
+      document.getElementById("bodyXLabel");
+
+    const bodyYLabel =
+      document.getElementById("bodyYLabel");
+
+    const titleSizeLabel =
+      document.getElementById("titleSizeLabel");
+
+    const bodySizeLabel =
+      document.getElementById("bodySizeLabel");
+
+
+    const saveCloseBtn =
+      document.getElementById("saveCloseBtn");
+
+
+    const clearBgBtn =
+      document.getElementById("clearBgBtn");
+
+
+    const resetBtn =
+      document.getElementById("resetBtn");
+
+
+
+    function loadState() {
+
+      try {
+
+        const raw =
+          localStorage.getItem(STORAGE_KEY);
+
+        if (!raw)
+          return { ...defaultState };
+
+
+        return {
+          ...defaultState,
+          ...JSON.parse(raw)
+        };
+
+      }
+
+      catch {
+
+        return { ...defaultState };
+
+      }
+
+    }
+
+
+
+    function saveState() {
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(state)
+      );
+
+    }
+
+
+
+    function getFontFamily(preset) {
+
+      if (preset === "ios") {
+
+        return 'SF Pro Text, SF Pro Display, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif';
+
+      }
+
+
+      if (preset === "keep") {
+
+        return 'Roboto, "Noto Sans", Arial, sans-serif';
+
+      }
+
+
+      if (preset === "georgia") {
+
+        return 'Georgia, "Times New Roman", serif';
+
+      }
+
+
+      if (preset === "courier") {
+
+        return '"Courier New", Courier, monospace';
+
+      }
+
+
+      return 'Arial, sans-serif';
+
+    }
+
+
+
+    function hasUserCode() {
+
+      return /^[A-Za-z]{3}$/.test(
+        state.userCode || ""
+      );
+
+    }
+
+
+
+    function render() {
+
+      titleDisplay.innerText =
+        state.title;
+
+
+      titleDisplay.style.left =
+        state.titleX + "%";
+
+
+      titleDisplay.style.top =
+        state.titleY + "%";
+
+
+      bodyDisplay.style.left =
+        state.bodyX + "%";
+
+
+      bodyDisplay.style.top =
+        state.bodyY + "%";
+
+
+      titleDisplay.style.fontSize =
+        state.titleSize + "px";
+
+
+      bodyDisplay.style.fontSize =
+        state.bodySize + "px";
+
+
+      const family =
+        getFontFamily(state.fontPreset);
+
+
+      titleDisplay.style.fontFamily =
+        family;
+
+
+      bodyDisplay.style.fontFamily =
+        family;
+
+
+      app.style.backgroundImage =
+        state.bgData
+          ? `url(${state.bgData})`
+          : "none";
+
+
+      app.style.backgroundColor =
+        "#ffffff";
+
+
+      userCode.value =
+        (state.userCode || "")
+          .toUpperCase();
+
+
+      fontSelect.value =
+        state.fontPreset;
+
+
+      titleX.value =
+        state.titleX;
+
+
+      titleY.value =
+        state.titleY;
+
+
+      bodyX.value =
+        state.bodyX;
+
+
+      bodyY.value =
+        state.bodyY;
+
+
+      titleSize.value =
+        state.titleSize;
+
+
+      bodySize.value =
+        state.bodySize;
+
+
+      titleXLabel.textContent =
+        `Izquierda: ${state.titleX}%`;
+
+
+      titleYLabel.textContent =
+        `Arriba: ${state.titleY}%`;
+
+
+      bodyXLabel.textContent =
+        `Izquierda: ${state.bodyX}%`;
+
+
+      bodyYLabel.textContent =
+        `Arriba: ${state.bodyY}%`;
+
+
+      titleSizeLabel.textContent =
+        `${state.titleSize} px`;
+
+
+      bodySizeLabel.textContent =
+        `${state.bodySize} px`;
+
+
+      bgInfo.textContent =
+        state.bgData
+          ? "Imagen cargada en memoria local"
+          : "Sin imagen cargada";
+
+
+      titleDisplay.classList.toggle(
+        "placeholder",
+        !state.title
+      );
+
+    }
+
+
+
+    function renderLight() {
+
+      titleDisplay.style.left =
+        state.titleX + "%";
+
+
+      titleDisplay.style.top =
+        state.titleY + "%";
+
+
+      bodyDisplay.style.left =
+        state.bodyX + "%";
+
+
+      bodyDisplay.style.top =
+        state.bodyY + "%";
+
+
+      titleDisplay.style.fontSize =
+        state.titleSize + "px";
+
+
+      bodyDisplay.style.fontSize =
+        state.bodySize + "px";
+
+
+      const family =
+        getFontFamily(state.fontPreset);
+
+
+      titleDisplay.style.fontFamily =
+        family;
+
+
+      bodyDisplay.style.fontFamily =
+        family;
+
+
+      app.style.backgroundImage =
+        state.bgData
+          ? `url(${state.bgData})`
+          : "none";
+
+
+      userCode.value =
+        (state.userCode || "")
+          .toUpperCase();
+
+
+      fontSelect.value =
+        state.fontPreset;
+
+
+      titleX.value =
+        state.titleX;
+
+
+      titleY.value =
+        state.titleY;
+
+
+      bodyX.value =
+        state.bodyX;
+
+
+      bodyY.value =
+        state.bodyY;
+
+
+      titleSize.value =
+        state.titleSize;
+
+
+      bodySize.value =
+        state.bodySize;
+
+
+      titleXLabel.textContent =
+        `Izquierda: ${state.titleX}%`;
+
+
+      titleYLabel.textContent =
+        `Arriba: ${state.titleY}%`;
+
+
+      bodyXLabel.textContent =
+        `Izquierda: ${state.bodyX}%`;
+
+
+      bodyYLabel.textContent =
+        `Arriba: ${state.bodyY}%`;
+
+
+      titleSizeLabel.textContent =
+        `${state.titleSize} px`;
+
+
+      bodySizeLabel.textContent =
+        `${state.bodySize} px`;
+
+
+      bgInfo.textContent =
+        state.bgData
+          ? "Imagen cargada en memoria local"
+          : "Sin imagen cargada";
+
+
+      titleDisplay.classList.toggle(
+        "placeholder",
+        !state.title
+      );
+
+    }
+
+
+
+    function syncTitleFromScreen() {
+
+      state.title =
+        titleDisplay
+          .innerText
+          .replace(/\\n{3,}/g, "\\n\\n")
+          .trim();
+
+
+      saveState();
+
+      renderLight();
+
+    }
+
+
+
+    function openSettings() {
+
+      userCode.value =
+        (state.userCode || "")
+          .toUpperCase();
+
+
+      settingsPanel.style.display =
+        "flex";
+
+    }
+
+
+
+    function closeSettings() {
+
+      settingsPanel.style.display =
+        "none";
+
+    }
+
+
+
+    async function fetchBody() {
+
+      if (!hasUserCode()) {
+
+        bodyDisplay.innerText = "";
+
+        lastData = "";
+
+        return;
+
+      }
+
+
+      const user =
+        state.userCode.toLowerCase();
+
+
+      const apiUrl =
+        "https://appmaz.vip/api/getdata.php?user="
+        +
+        encodeURIComponent(user);
+
+
+      try {
+
+        const response =
+          await fetch(
+            apiUrl,
+            {
+              cache: "no-store"
+            }
+          );
+
+
+        if (!response.ok)
+          throw new Error(
+            "HTTP "
+            +
+            response.status
+          );
+
+
+        const json =
+          await response.json();
+
+
+        const data =
+          json?.data
+          ??
+          (
+            typeof json === "string"
+              ? json
+              : JSON.stringify(json)
+          );
+
+
+        if (data !== lastData) {
+
+          lastData =
+            data || "";
+
+
+          bodyDisplay.innerText =
+            lastData;
+
+        }
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "Error consultando directamente el API:",
+          error
+        );
+
+      }
+
+    }
+
+
+
+    titleDisplay.addEventListener(
+      "input",
+      syncTitleFromScreen
+    );
+
+
+    titleDisplay.addEventListener(
+      "focus",
+      () => {
+
+        titleDisplay.classList.remove(
+          "placeholder"
+        );
+
+      }
+    );
+
+
+    titleDisplay.addEventListener(
+      "blur",
+      syncTitleFromScreen
+    );
+
+
+
+    fontSelect.addEventListener(
+      "change",
+      () => {
+
+        state.fontPreset =
+          fontSelect.value;
+
+
+        saveState();
+
+        renderLight();
+
+      }
+    );
+
+
+
+    titleX.addEventListener(
+      "input",
+      () => {
+
+        state.titleX =
+          Number(titleX.value);
+
+
+        saveState();
+
+        renderLight();
+
+      }
+    );
+
+
+
+    titleY.addEventListener(
+      "input",
+      () => {
+
+        state.titleY =
+          Number(titleY.value);
+
+
+        saveState();
+
+        renderLight();
+
+      }
+    );
+
+
+
+    bodyX.addEventListener(
+      "input",
+      () => {
+
+        state.bodyX =
+          Number(bodyX.value);
+
+
+        saveState();
+
+        renderLight();
+
+      }
+    );
+
+
+
+    bodyY.addEventListener(
+      "input",
+      () => {
+
+        state.bodyY =
+          Number(bodyY.value);
+
+
+        saveState();
+
+        renderLight();
+
+      }
+    );
+
+
+
+    titleSize.addEventListener(
+      "input",
+      () => {
+
+        state.titleSize =
+          Number(titleSize.value);
+
+
+        saveState();
+
+        renderLight();
+
+      }
+    );
+
+
+
+    bodySize.addEventListener(
+      "input",
+      () => {
+
+        state.bodySize =
+          Number(bodySize.value);
+
+
+        saveState();
+
+        renderLight();
+
+      }
+    );
+
+
+
+    bgInput.addEventListener(
+      "change",
+      event => {
+
+        const file =
+          event.target.files
+          &&
+          event.target.files[0];
+
+
+        if (!file)
+          return;
+
+
+        const reader =
+          new FileReader();
+
+
+        reader.onload =
+          function(event) {
+
+            state.bgData =
+              event.target.result;
+
+
+            saveState();
+
+            renderLight();
+
+          };
+
+
+        reader.readAsDataURL(file);
+
+      }
+    );
+
+
+
+    clearBgBtn.addEventListener(
+      "click",
+      () => {
+
+        state.bgData = "";
+
+
+        bgInput.value = "";
+
+
+        saveState();
+
+        renderLight();
+
+      }
+    );
+
+
+
+    resetBtn.addEventListener(
+      "click",
+      () => {
+
+        state =
+          { ...defaultState };
+
+
+        bgInput.value = "";
+
+
+        lastData = "";
+
+
+        saveState();
+
+
+        render();
+
+
+        bodyDisplay.innerText =
+          "";
+
+
+        closeSettings();
+
+      }
+    );
+
+
+
+    saveCloseBtn.addEventListener(
+      "click",
+      () => {
+
+        const rawCode =
+          (userCode.value || "")
+            .trim()
+            .toUpperCase();
+
+
+        if (
+          rawCode !== ""
+          &&
+          !/^[A-Z]{3}$/.test(rawCode)
+        ) {
+
+          alert(
+            "El código debe tener exactamente 3 letras."
+          );
+
+          return;
+
+        }
+
+
+        state.userCode =
+          rawCode;
+
+
+        saveState();
+
+
+        lastData = "";
+
+
+        closeSettings();
+
+
+        fetchBody();
+
+
+        renderLight();
+
+      }
+    );
+
+
+
+    settingsPanel.addEventListener(
+      "click",
+      event => {
+
+        if (
+          event.target
+          ===
+          settingsPanel
+        ) {
+
+          closeSettings();
+
+        }
+
+      }
+    );
+
+
+
+    /*
+      Pulsación larga de 3 segundos
+      en la zona inferior.
+    */
+
+    let pressTimer = null;
+
+    let startX = 0;
+
+    let startY = 0;
+
+
+
+    function startPress(event) {
+
+      const point =
+        event.touches
+          ? event.touches[0]
+          : event;
+
+
+      startX =
+        point.clientX;
+
+
+      startY =
+        point.clientY;
+
+
+      pressTimer =
+        setTimeout(
+          () => {
+
+            openSettings();
+
+          },
+          3000
+        );
+
+    }
+
+
+
+    function cancelPress() {
+
+      clearTimeout(
+        pressTimer
+      );
+
+
+      pressTimer = null;
+
+    }
+
+
+
+    function movePress(event) {
+
+      if (!pressTimer)
+        return;
+
+
+      const point =
+        event.touches
+          ? event.touches[0]
+          : event;
+
+
+      const dx =
+        Math.abs(
+          point.clientX
+          -
+          startX
+        );
+
+
+      const dy =
+        Math.abs(
+          point.clientY
+          -
+          startY
+        );
+
+
+      if (
+        dx > 12
+        ||
+        dy > 12
+      ) {
+
+        cancelPress();
+
+      }
+
+    }
+
+
+
+    footerTrigger.addEventListener(
+      "mousedown",
+      startPress
+    );
+
+
+    footerTrigger.addEventListener(
+      "mouseup",
+      cancelPress
+    );
+
+
+    footerTrigger.addEventListener(
+      "mouseleave",
+      cancelPress
+    );
+
+
+    footerTrigger.addEventListener(
+      "mousemove",
+      movePress
+    );
+
+
+    footerTrigger.addEventListener(
+      "touchstart",
+      startPress,
+      {
+        passive: true
+      }
+    );
+
+
+    footerTrigger.addEventListener(
+      "touchend",
+      cancelPress,
+      {
+        passive: true
+      }
+    );
+
+
+    footerTrigger.addEventListener(
+      "touchcancel",
+      cancelPress,
+      {
+        passive: true
+      }
+    );
+
+
+    footerTrigger.addEventListener(
+      "touchmove",
+      movePress,
+      {
+        passive: true
+      }
+    );
+
+
+
+    /*
+      Registrar Service Worker.
+
+      Al usar "./sw.js",
+      funciona dentro de la carpeta
+      concreta donde subas la app.
+    */
+
+    if ("serviceWorker" in navigator) {
+
+      window.addEventListener(
+        "load",
+        () => {
+
+          navigator.serviceWorker
+            .register("./sw.js")
+            .catch(() => {});
+
+        }
+      );
+
+    }
+
+
+
+    render();
+
+    fetchBody();
+
+
+    setInterval(
+      fetchBody,
+      2000
+    );
+
+  </script>
+
+</body>
+</html>
