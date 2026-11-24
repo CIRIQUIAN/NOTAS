@@ -1,7 +1,7 @@
 import { extractText } from './note-core.mjs';
 
 export class NotePoller {
-  constructor({ readCode, onText, fetchImpl = globalThis.fetch, onError = console.error }) {
+  constructor({ readCode, onText, fetchImpl = (...args) => globalThis.fetch(...args), onError = console.error }) {
     this.readCode = readCode;
     this.onText = onText;
     this.fetchImpl = fetchImpl;

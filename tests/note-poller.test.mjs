@@ -92,3 +92,17 @@ test('network and JSON errors preserve the draft and allow later recovery', asyn
   assert.equal(state.body, 'my edit');
   assert.equal(errors.length, 3);
 });
+
+test('default transport calls fetch with the browser global as its receiver', async () => {
+  const original = globalThis.fetch;
+  const received = [];
+  globalThis.fetch = async function () {
+    assert.equal(this, globalThis, 'Browser fetch rejects a class instance as this');
+    return response('Araña');
+  };
+  try {
+    const poller = new NotePoller({ readCode: () => 'UOG', onText: text => received.push(text), onError: error => { throw error; } });
+    await poller.poll();
+    assert.deepEqual(received, ['Araña']);
+  } finally { globalThis.fetch = original; }
+});
