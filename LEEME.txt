@@ -1,25 +1,43 @@
-NOTAS — PWA para GitHub Pages
+NOTES — GitHub Pages PWA
 
-CONTENIDO
-- index.html: aplicación principal. Consulta directamente https://appmaz.vip/api/getdata.php
-- manifest.webmanifest: permite instalar la web como app.
-- sw.js: service worker para instalación y recursos locales. La API NO se cachea.
-- icons/: iconos para Android/iPhone.
+USE
+- Open Settings with the palette button, or hold the empty area of the footer for 3 seconds.
+- Enter a 3-letter Hacked user code. Changes save automatically on this device; Done only closes Settings.
+- Tap the title or body to edit. Both scroll in the central area, clipped behind the fixed header and footer.
+- Position and font size remain independently adjustable. The body moves down if a long title would overlap it.
+- Tap the bottom-right dots to toggle acronym mode. Blue means on. Toggling never changes the current note.
+- Only a DIFFERENT API response replaces the body. Repeated responses preserve edits, even after reloading.
+- Clearing/changing the user code disconnects the previous source and clears its body and comparison baseline.
+- Reset all clears the note and settings after confirmation.
 
-SUBIR A GITHUB
-1. Crea un repositorio nuevo en GitHub.
-2. Sube TODO el contenido de esta carpeta a la raíz del repositorio.
-3. Ve a Settings > Pages.
-4. En Build and deployment selecciona: Deploy from a branch.
-5. Branch: main / (root) y pulsa Save.
-6. GitHub te dará una URL similar a https://usuario.github.io/repositorio/
+APPEARANCE
+- iPhone Light is the available preset. The fixed artwork is recreated with SVG/CSS from the supplied reference.
+- Custom screenshot uploads and arbitrary font choices have been removed.
+- iPhone Dark and Android variants await their reference images and are unavailable for now.
+- Light mode is explicit and independent of the device's dark-mode setting. The native status bar is controlled by browser/PWA support; the app does not fabricate time or battery values.
+- Font uses the system Apple font on Apple devices and Helvetica/Arial fallbacks elsewhere.
 
-INSTALAR EN IPHONE
-1. Abre esa URL en Safari.
-2. Pulsa Compartir.
-3. Pulsa Añadir a pantalla de inicio.
-4. Ábrela desde el icono: funcionará como app independiente.
+ACRONYMS
+- Lists are in characters.mjs, exactly in the supplied order.
+- One character name per line. Spaces, digits and punctuation produce no blank lines.
+- Repeated letters use successive entries, wrapping only after that letter's list is exhausted.
+- Counters reset for each new API text. Accents fall back to the base letter, except explicitly supplied special-letter lists, such as Ñ, Ç and Å, which take precedence.
+- Unsupported letters without a matching list are skipped.
 
-IMPORTANTE
-- No cambies las rutas relativas ./ si vas a alojarla dentro de un repositorio de GitHub Pages.
-- La consulta a appmaz.vip se hace siempre por red y cada 2 segundos, como en la versión probada.
+FILES
+- index.html / styles.css: English UI, fixed artwork and scrollable editable note.
+- app.mjs: auto-save, editor, controls and layout.
+- note-core.mjs / characters.mjs: state, response comparison and acronym conversion.
+- note-poller.mjs: API polling with cancellation and stale-response protection.
+- manifest.webmanifest / sw.js / icons/: installable offline app shell.
+
+CHECKS
+Run npm test with Node.js 20 or later. No dependency installation or build is required.
+Tests use mocked API responses, never real user codes.
+Browser visual checks on iPhone/Safari and Android remain necessary for mobile keyboard and native status-bar behavior.
+
+DEPLOY
+Publish the repository root to GitHub Pages using main / (root).
+Keep all asset paths relative so the app works at /NOTAS/.
+The API is polled every 2 seconds while the page is running; a slow request finishes or times out before another request for that source starts.
+The API is never cached. Offline mode preserves the saved draft and settings, but receiving new information requires a connection.

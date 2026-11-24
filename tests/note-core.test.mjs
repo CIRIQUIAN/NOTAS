@@ -1,0 +1,90 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { toAcronym, receiveText, restoreState, defaults, extractText } from '../note-core.mjs';
+import { characters } from '../characters.mjs';
+
+test('repeated API responses preserve all edits, including deletion', () => {
+  const state = { ...defaults };
+  assert.equal(receiveText(state, 'perro'), true);
+  state.body = 'perros';
+  assert.equal(receiveText(state, 'perro'), false);
+  assert.equal(state.body, 'perros');
+  state.body = '';
+  receiveText(state, 'perro');
+  assert.equal(state.body, '');
+  receiveText(state, 'gato');
+  assert.equal(state.body, 'gato');
+  receiveText(state, 'perro');
+  assert.equal(state.body, 'perro');
+});
+
+test('mode switches only affect a different incoming message', () => {
+  const state = { ...defaults };
+  receiveText(state, 'perro');
+  state.acronymEnabled = true;
+  receiveText(state, 'perro');
+  assert.equal(state.body, 'perro');
+  receiveText(state, 'gato');
+  assert.equal(state.body, toAcronym('gato'));
+  state.body += '\nMy own note';
+  state.acronymEnabled = false;
+  const draft = state.body;
+  receiveText(state, 'gato');
+  assert.equal(state.body, draft);
+  receiveText(state, 'otro');
+  assert.equal(state.body, 'otro');
+});
+
+test('perro uses a different person for each repeated R', () => {
+  assert.equal(toAcronym('perro'), 'Pablo Picasso\nErnest Hemingway\nRosa Parks\nRichard Feynman\nOprah Winfrey');
+});
+
+test('words, punctuation and accents share one sequence without blank lines', () => {
+  assert.equal(toAcronym('  PÉR RO! 123\n'), toAcronym('perro'));
+  assert.equal(toAcronym('éèêë'), characters.E.slice(0, 4).join('\n'));
+  assert.equal(toAcronym('pe\u0301rro'), toAcronym('perro'));
+  assert.equal(toAcronym(' 123!?'), '');
+});
+
+test('explicit special letters keep their own lists, including decomposed input', () => {
+  for (const key of ['Ñ', 'Ç', 'Ø', 'Å', 'Æ', 'Ł', 'Þ', 'Š', 'Č', 'Ž', 'İ']) {
+    assert.equal(toAcronym(key), characters[key][0]);
+    assert.equal(toAcronym(key.normalize('NFD')), characters[key][0]);
+  }
+  assert.equal(toAcronym('ñññ'), 'Ñuflo Chaves\nÑuño Rasura\nÑuflo Chaves');
+});
+
+test('exhausted lists cycle, and counters reset for each message', () => {
+  assert.equal(toAcronym('a'.repeat(9)), [...characters.A, characters.A[0]].join('\n'));
+  assert.equal(toAcronym('a'), characters.A[0]);
+});
+
+test('reload retains draft, source baseline and mode together', () => {
+  const state = restoreState({ ...defaults, body: 'perros', lastReceived: 'perro', acronymEnabled: true });
+  receiveText(state, 'perro');
+  assert.equal(state.body, 'perros');
+  assert.equal(state.acronymEnabled, true);
+});
+
+test('migration preserves supported settings without retaining custom images', () => {
+  const state = restoreState({ userCode: 'abc', title: 'My title', titleX: 95, titleSize: 32, bgData: 'data:image/png,old', fontPreset: 'georgia' });
+  assert.equal(state.userCode, 'ABC');
+  assert.equal(state.title, 'My title');
+  assert.equal(state.titleX, 80);
+  assert.equal(state.titleSize, 32);
+  assert.equal(Object.hasOwn(state, 'bgData'), false);
+  assert.deepEqual(restoreState(null), defaults);
+});
+
+test('API values are normalized before comparison, empty results clear once', () => {
+  assert.equal(extractText({ data: 'perro' }), 'perro');
+  assert.equal(extractText('perro'), 'perro');
+  assert.equal(extractText({ data: 0 }), '0');
+  assert.equal(extractText({ data: '' }), '');
+  const state = { ...defaults, body: 'old', lastReceived: 'old' };
+  receiveText(state, '');
+  assert.equal(state.body, '');
+  state.body = 'manual';
+  receiveText(state, '');
+  assert.equal(state.body, 'manual');
+});
