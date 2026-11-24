@@ -1,7 +1,7 @@
 {
-  "name": "Notas",
-  "short_name": "Notas",
-  "description": "Aplicación de notas conectada a Appmazing",
+  "name": "Notes",
+  "short_name": "Notes",
+  "description": "Editable notes connected to Appmazing",
   "id": "./",
   "start_url": "./",
   "scope": "./",
@@ -26,5 +26,6 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "lang": "en"
 }

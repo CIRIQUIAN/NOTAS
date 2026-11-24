@@ -1,8 +1,13 @@
-const CACHE_NAME = "notas-pwa-v1";
+const CACHE_NAME = "notas-pwa-v4";
 
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./styles.css",
+  "./app.mjs",
+  "./note-core.mjs",
+  "./note-poller.mjs",
+  "./characters.mjs",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
@@ -21,7 +26,7 @@ self.addEventListener("activate", event => {
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(key => key !== CACHE_NAME)
+          .filter(key => key.startsWith("notas-pwa-") && key !== CACHE_NAME)
           .map(key => caches.delete(key))
       )
     )
