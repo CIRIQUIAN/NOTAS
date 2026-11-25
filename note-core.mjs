@@ -1,6 +1,12 @@
 import { characters } from './characters.mjs';
 
+// Match a complete received name independently of formatting or diacritics.
+function nameKey(text) {
+  return text.normalize('NFD').replace(/\p{M}/gu, '').toUpperCase().replace(/[^\p{L}\p{N}]/gu, '');
+}
+
 export function toAcronym(text) {
+  const excludedName = nameKey(text);
   const counts = new Map();
   const names = [];
   for (const character of text.normalize('NFC')) {
@@ -9,7 +15,8 @@ export function toAcronym(text) {
       ? upper
       : upper.normalize('NFD').replace(/\p{M}/gu, '');
     if (!Object.hasOwn(characters, key)) continue;
-    const list = characters[key];
+    const list = characters[key].filter(name => nameKey(name) !== excludedName);
+    if (!list.length) continue;
     const index = counts.get(key) || 0;
     names.push(list[index % list.length]);
     counts.set(key, index + 1);

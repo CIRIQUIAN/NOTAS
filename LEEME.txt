@@ -22,6 +22,7 @@ ACRONYMS
 - Lists are in characters.mjs, exactly in the supplied order.
 - One character name per line. Spaces, digits and punctuation produce no blank lines.
 - Repeated letters use successive entries, wrapping only after that letter's list is exhausted.
+- If the complete API text names a listed person, that person is excluded from every line of the acronym. Matching ignores case, accents, spaces and punctuation; remaining candidates keep their order and rotation.
 - Counters reset for each new API text. Accents fall back to the base letter, except explicitly supplied special-letter lists, such as Ñ, Ç and Å, which take precedence.
 - Unsupported letters without a matching list are skipped.
 

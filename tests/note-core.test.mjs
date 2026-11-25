@@ -120,3 +120,40 @@ test('an empty acronym does not consume the armed state', () => {
   assert.equal(state.acronymEnabled, false);
   assert.equal(state.body, toAcronym('hola'));
 });
+
+test('a received character never appears in their own acronym', () => {
+  for (const name of Object.values(characters).flat()) {
+    assert.ok(!toAcronym(name).split('\n').includes(name), name);
+  }
+  const result = toAcronym('Albert Einstein').split('\n');
+  assert.equal(result[0], 'Alfred Hitchcock');
+  assert.equal(result.length, 14);
+});
+
+test('character exclusion ignores case, accents, whitespace and punctuation', () => {
+  for (const input of ['albert einstein', '  ALBERT   EINSTEIN  ', 'Álbert Éinstein', 'Albert\nEinstein', 'Albert-Einstein']) {
+    assert.equal(toAcronym(input).split('\n')[0], 'Alfred Hitchcock');
+    assert.ok(!toAcronym(input).split('\n').includes('Albert Einstein'));
+  }
+});
+
+test('repeated letters rotate over the remaining candidates without blank lines', () => {
+  const result = toAcronym('Amelia Earhart').split('\n');
+  const aNames = result.filter(name => name.startsWith('A'));
+  assert.deepEqual(aNames, ['Albert Einstein', 'Alfred Hitchcock', 'Anne Frank', 'Angela Merkel']);
+  assert.equal(result.length, 13);
+  assert.ok(!result.includes(''));
+  assert.equal(toAcronym('Albert').split('\n')[0], 'Albert Einstein');
+});
+
+test('excluding a name preserves one-shot mode and API repetition rules', () => {
+  const state = { ...defaults, acronymEnabled: true };
+  receiveText(state, 'Albert Einstein');
+  assert.ok(!state.body.includes('Albert Einstein'));
+  assert.equal(state.acronymEnabled, false);
+  state.body = 'My edit';
+  receiveText(state, 'Albert Einstein');
+  assert.equal(state.body, 'My edit');
+  receiveText(state, 'Marie Curie');
+  assert.equal(state.body, 'Marie Curie');
+});
