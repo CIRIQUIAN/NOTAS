@@ -74,7 +74,7 @@ const poller = new NotePoller({
       body.innerText = state.body;
       viewport.scrollTop = 0;
       save();
-      layout();
+      syncControls();
     }
   },
 });
@@ -131,7 +131,6 @@ $('acronymBtn').addEventListener('click', () => {
 function openSettings() {
   if (!settings.open) settings.showModal();
 }
-$('settingsBtn').addEventListener('click', openSettings);
 $('closeBtn').addEventListener('click', () => settings.close());
 $('doneBtn').addEventListener('click', () => settings.close());
 settings.addEventListener('click', event => {
@@ -152,31 +151,62 @@ $('resetBtn').addEventListener('click', () => {
 
 let pressTimer;
 let pressStart;
-const cancelPress = () => clearTimeout(pressTimer);
-const footerTrigger = $('footerTrigger');
-footerTrigger.addEventListener('pointerdown', event => {
+const cancelPress = () => {
+  clearTimeout(pressTimer);
+  pressStart = null;
+};
+const footer = $('noteFooter');
+footer.addEventListener('pointerdown', event => {
+  if (event.target.closest('#acronymBtn') || event.button !== 0 || !event.isPrimary) return;
+  event.preventDefault();
   cancelPress();
+  window.getSelection()?.removeAllRanges();
+  footer.setPointerCapture(event.pointerId);
   pressStart = { x: event.clientX, y: event.clientY };
-  pressTimer = setTimeout(openSettings, 3000);
+  pressTimer = setTimeout(() => {
+    cancelPress();
+    openSettings();
+  }, 3000);
 });
-footerTrigger.addEventListener('pointermove', event => {
+footer.addEventListener('pointermove', event => {
   if (pressStart && (Math.abs(event.clientX - pressStart.x) > 12 || Math.abs(event.clientY - pressStart.y) > 12)) cancelPress();
 });
-for (const event of ['pointerup', 'pointercancel', 'pointerleave']) footerTrigger.addEventListener(event, cancelPress);
+for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) footer.addEventListener(event, cancelPress);
+footer.addEventListener('contextmenu', event => event.preventDefault());
+footer.addEventListener('selectstart', event => event.preventDefault());
 window.addEventListener('blur', cancelPress);
 
 const observer = new ResizeObserver(layout);
 for (const element of [title, body, viewport]) observer.observe(element);
+// Keep a keyboard-free height for browsers that also resize the layout viewport.
+let restingHeight = window.innerHeight;
+let restingWidth = window.innerWidth;
+let keyboardOpen = false;
 function resizeViewport() {
-  if (window.visualViewport) {
-    $('app').style.setProperty('--viewport-height', `${window.visualViewport.height}px`);
-    $('app').style.top = `${window.visualViewport.offsetTop}px`;
+  const visible = window.visualViewport;
+  // Pinch zoom is not a keyboard resize.
+  if (visible && Math.abs(visible.scale - 1) > 0.05) return;
+  if (Math.abs(window.innerWidth - restingWidth) > 80) {
+    restingWidth = window.innerWidth;
+    restingHeight = window.innerHeight;
+    keyboardOpen = false;
   }
+  const height = visible?.height ?? window.innerHeight;
+  const active = document.activeElement;
+  const editing = active?.isContentEditable || active?.matches('input[type="text"], textarea');
+  const covered = Math.max(restingHeight, window.innerHeight) - height;
+  keyboardOpen = covered > 120 && (editing || keyboardOpen);
+  if (!keyboardOpen && !editing) restingHeight = window.innerHeight;
+  $('app').classList.toggle('keyboard-open', keyboardOpen);
+  $('app').style.setProperty('--viewport-height', `${height}px`);
+  $('app').style.top = `${visible?.offsetTop ?? 0}px`;
   layout();
 }
 window.visualViewport?.addEventListener('resize', resizeViewport);
 window.visualViewport?.addEventListener('scroll', resizeViewport);
 window.addEventListener('resize', resizeViewport);
+document.addEventListener('focusin', resizeViewport);
+document.addEventListener('focusout', () => requestAnimationFrame(resizeViewport));
 window.addEventListener('online', fetchBody);
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) fetchBody();

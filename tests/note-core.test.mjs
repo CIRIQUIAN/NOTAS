@@ -88,3 +88,35 @@ test('API values are normalized before comparison, empty results clear once', ()
   receiveText(state, '');
   assert.equal(state.body, 'manual');
 });
+
+test('acronym is one-shot and stays armed across repeated responses', () => {
+  const state = { ...defaults };
+  receiveText(state, 'perro');
+  state.body = 'perros';
+  state.acronymEnabled = true;
+  receiveText(state, 'perro');
+  assert.equal(state.acronymEnabled, true);
+  assert.equal(state.body, 'perros');
+  receiveText(state, 'gato');
+  assert.equal(state.body, toAcronym('gato'));
+  assert.equal(state.acronymEnabled, false);
+  state.body += '\nMy edit';
+  const draft = state.body;
+  receiveText(state, 'gato');
+  assert.equal(state.body, draft);
+  receiveText(state, 'hola');
+  assert.equal(state.body, 'hola');
+  state.acronymEnabled = true;
+  receiveText(state, 'otra');
+  assert.equal(state.body, toAcronym('otra'));
+  assert.equal(state.acronymEnabled, false);
+});
+
+test('an empty acronym does not consume the armed state', () => {
+  const state = { ...defaults, acronymEnabled: true };
+  receiveText(state, '123!?');
+  assert.equal(state.acronymEnabled, true);
+  receiveText(state, 'hola');
+  assert.equal(state.acronymEnabled, false);
+  assert.equal(state.body, toAcronym('hola'));
+});

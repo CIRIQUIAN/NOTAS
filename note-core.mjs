@@ -28,6 +28,7 @@ export function receiveText(state, incoming) {
   if (incoming === state.lastReceived) return false;
   state.lastReceived = incoming;
   state.body = state.acronymEnabled ? toAcronym(incoming) : incoming;
+  if (state.acronymEnabled && state.body) state.acronymEnabled = false;
   return true;
 }
 

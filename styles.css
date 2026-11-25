@@ -1,10 +1,10 @@
 :root {
   color-scheme: light;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  font-family: Roboto, "Noto Sans", Arial, sans-serif;
   color: #161616;
   background: #fff;
-  --header-size: clamp(100px, 28vw, 150px);
-  --footer-size: clamp(72px, 20vw, 108px);
+  --header-size: clamp(78px, 21vw, 112px);
+  --footer-size: clamp(54px, 14vw, 72px);
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
@@ -14,7 +14,7 @@ button { cursor: pointer; touch-action: manipulation; }
 button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid #1769d3; outline-offset: 3px; }
 .symbols { position: absolute; width: 0; height: 0; overflow: hidden; }
 #app { position: absolute; top: 0; left: 0; width: 100%; height: 100dvh; height: var(--viewport-height, 100dvh); display: flex; flex-direction: column; overflow: hidden; background: #fff; }
-#noteHeader { flex: 0 0 calc(var(--header-size) + env(safe-area-inset-top)); padding: calc(clamp(38px, 10.7vw, 58px) + env(safe-area-inset-top)) 4% 0; display: flex; justify-content: space-between; align-items: flex-start; background: #fff; z-index: 2; user-select: none; }
+#noteHeader { flex: 0 0 calc(var(--header-size) + env(safe-area-inset-top)); padding: calc(clamp(16px, 4.6vw, 26px) + env(safe-area-inset-top)) 4% 0; display: flex; justify-content: space-between; align-items: flex-start; background: #fff; z-index: 2; user-select: none; }
 svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .glass { height: clamp(44px, 11.6vw, 62px); border: 1px solid #e6e6e6; border-radius: 999px; background: linear-gradient(#fdfdfd, #f8f8f8 50%, #fff); box-shadow: 0 2px 7px #00000003, inset 0 0 4px #fff; display: flex; align-items: center; justify-content: center; color: #626262; }
 .back { width: clamp(44px, 11.6vw, 62px); color: #252525; }
@@ -27,7 +27,7 @@ svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width:
 #titleDisplay { font-weight: 700; }
 #titleDisplay:empty::before { content: attr(data-placeholder); color: #b0b0b0; pointer-events: none; }
 #bodyDisplay { min-height: 130px; }
-#noteFooter { flex: 0 0 calc(var(--footer-size) + env(safe-area-inset-bottom)); display: flex; align-items: flex-start; padding: 10px 3% env(safe-area-inset-bottom); background: #fff; color: #626262; z-index: 2; user-select: none; }
+#noteFooter { flex: 0 0 calc(var(--footer-size) + env(safe-area-inset-bottom)); display: flex; align-items: flex-start; padding: 6px 3% env(safe-area-inset-bottom); background: #fff; color: #626262; z-index: 2; user-select: none; }
 .icon-button, .decoration { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 44px; padding: 10px; flex: 0 0 48px; border: 0; border-radius: 24px; background: transparent; color: inherit; }
 #footerTrigger { flex: 1; height: 100%; min-height: 44px; touch-action: none; }
 #acronymBtn[aria-pressed="true"] { background: #e9f2ff; color: #1769d3; }
@@ -53,3 +53,13 @@ input[aria-invalid="true"] { border-color: #b32d22; }
 .warning { position: fixed; z-index: 10; top: 0; left: 5%; right: 5%; background: #fff1d5; color: #6c3b00; padding: 10px; font-size: 13px; border-radius: 10px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @media (max-height: 500px) { :root { --header-size: 68px; --footer-size: 54px; } #noteHeader { padding-top: calc(10px + env(safe-area-inset-top)); } #noteFooter { padding-top: 0; } }
+
+/* Shared by every appearance: a hold on the artwork must never select the note. */
+#noteHeader, #noteHeader *, #noteFooter, #noteFooter * {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+#noteFooter { touch-action: none; }
+/* The editor fits above the keyboard; the footer does not float above it. */
+#app.keyboard-open #noteFooter { display: none; }

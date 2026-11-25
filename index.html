@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual">
   <meta name="theme-color" content="#ffffff">
   <meta name="color-scheme" content="light">
   <meta name="mobile-web-app-capable" content="yes">
@@ -13,6 +13,9 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.mjs"></script>
 </head>
@@ -29,7 +32,7 @@
     </defs>
   </svg>
   <main id="app" aria-label="Notes">
-    <!-- Fixed artwork recreated from the supplied iPhone light reference. -->
+    <!-- Fixed artwork recreated from the supplied Android light reference. -->
     <header id="noteHeader" aria-hidden="true">
       <span class="glass back"><svg><use href="#backIcon"/></svg></span>
       <span class="glass tools"><svg><use href="#pinIcon"/></svg><svg><use href="#bellIcon"/></svg><svg><use href="#archiveIcon"/></svg></span>
@@ -42,7 +45,7 @@
     </div>
     <footer id="noteFooter">
       <span class="decoration" aria-hidden="true"><svg><use href="#addIcon"/></svg></span>
-      <button id="settingsBtn" class="icon-button" aria-label="Settings" title="Settings"><svg aria-hidden="true"><use href="#paletteIcon"/></svg></button>
+      <span class="decoration" aria-hidden="true"><svg><use href="#paletteIcon"/></svg></span>
       <div id="footerTrigger" aria-hidden="true"></div>
       <button id="acronymBtn" class="icon-button" aria-label="Acronym mode" aria-pressed="false" title="Acronym mode: off"><svg aria-hidden="true"><use href="#moreIcon"/></svg></button>
     </footer>
@@ -60,7 +63,7 @@
       </section>
       <section class="group">
         <label for="appearance">Appearance</label>
-        <select id="appearance"><option value="ios-light">iPhone · Light</option value="ios-dark" disabled>iPhone · Dark — coming soon</option><option value="android-light" disabled>Android · Light — coming soon</option><option value="android-dark" disabled>Android · Dark — coming soon</option></select>
+        <select id="appearance"><option value="android-light">Android · Light</option><option value="android-dark" disabled>Android · Dark — coming soon</option><option value="ios-light" disabled>iPhone · Light — coming soon</option><option value="ios-dark" disabled>iPhone · Dark — coming soon</option></select>
       </section>
       <section class="group">
         <h2>Title</h2>
@@ -76,7 +79,7 @@
       </section>
       <section class="group">
         <h2>Acronym mode</h2>
-        <p class="help">Tap the bottom-right button to switch modes. A blue button means acronym mode is on. It only affects the next different text received, never your current note.</p>
+        <p class="help">Tap the bottom-right button to arm acronym mode. Blue means it is waiting for new text. After displaying an acronym, the button returns to normal. Your current note is never changed by tapping it.</p>
       </section>
       <div class="buttons"><button id="doneBtn" class="primary">Done</button><button id="resetBtn" class="secondary">Reset all</button></div>
     </div>

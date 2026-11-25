@@ -1,21 +1,22 @@
 NOTES — GitHub Pages PWA
 
 USE
-- Open Settings with the palette button, or hold the empty area of the footer for 3 seconds.
+- Open the secret Settings only by holding the footer for 3 seconds (except the acronym button). The palette is decorative. Holds suppress selection and the touch callout; note editing still supports text selection.
 - Enter a 3-letter Hacked user code. Changes save automatically on this device; Done only closes Settings.
 - Tap the title or body to edit. Both scroll in the central area, clipped behind the fixed header and footer.
 - Position and font size remain independently adjustable. The body moves down if a long title would overlap it.
-- Tap the bottom-right dots to toggle acronym mode. Blue means on. Toggling never changes the current note.
+- Tap the bottom-right dots to arm acronym mode. Blue means armed. After the next different response produces an acronym, the button switches off automatically. Repeated responses preserve the armed state and the edited note.
 - Only a DIFFERENT API response replaces the body. Repeated responses preserve edits, even after reloading.
 - Clearing/changing the user code disconnects the previous source and clears its body and comparison baseline.
 - Reset all clears the note and settings after confirmation.
 
 APPEARANCE
-- iPhone Light is the available preset. The fixed artwork is recreated with SVG/CSS from the supplied reference.
+- Android Light is the available preset. The fixed artwork is recreated with SVG/CSS from the supplied reference.
 - Custom screenshot uploads and arbitrary font choices have been removed.
-- iPhone Dark and Android variants await their reference images and are unavailable for now.
+- iPhone variants and Android Dark await their reference images and are unavailable for now.
 - Light mode is explicit and independent of the device's dark-mode setting. The native status bar is controlled by browser/PWA support; the app does not fabricate time or battery values.
-- Font uses the system Apple font on Apple devices and Helvetica/Arial fallbacks elsewhere.
+- Font uses Roboto with Noto Sans/Arial fallbacks. Header/footer spacing and gestures are shared across future appearances.
+- When the software keyboard opens, the footer is hidden instead of floating above it. The editor remains scrollable in the visible area; the footer returns after the keyboard closes.
 
 ACRONYMS
 - Lists are in characters.mjs, exactly in the supplied order.
